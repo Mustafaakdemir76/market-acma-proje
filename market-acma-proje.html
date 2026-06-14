@@ -568,7 +568,7 @@ function renderTaskGantt() {
         <div class="gantt-bars-container">
             <div class="gantt-bar-wrap ${criticalClass}" style="left: ${startOffset}px; width: ${width}px; top: 12px;">
                 <div class="gantt-bar-progress" style="width: ${t.progress}%;"></div>
-                <div class="gantt-bar-title">${t.title}</div>
+                <div class="gantt-bar-title">${t.owner} - ${t.title}</div>
                 <div class="gantt-bar-text">%${t.progress}</div>
             </div>
         </div>
