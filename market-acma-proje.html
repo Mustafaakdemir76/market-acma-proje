@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Açma — Proje Yönetimi</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161820;
+  --bg3: #1e2030;
+  --bg4: #252840;
+  --green: #00d68f;
+  --green2: #00b87a;
+  --green-dim: rgba(0,214,143,0.12);
+  --amber: #ffb347;
+  --amber-dim: rgba(255,179,71,0.12);
+  --red: #ff6b6b;
+  --red-dim: rgba(255,107,107,0.12);
+  --blue: #5b8dee;
+  --blue-dim: rgba(91,141,238,0.12);
+  --purple: #b47bff;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf2;
+  --text2: #9499b7;
+  --text3: #5c6080;
+  --sidebar: 240px;
+  --radius: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6}
+a{text-decoration:none;color:inherit}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.logo-area{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.2}
+.logo-sub{font-size:11px;color:var(--text3);font-weight:400}
+.nav{padding:16px 12px;flex:1}
+.nav-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;padding:0 8px;margin-bottom:6px;margin-top:16px}
+.nav-label:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:400;transition:all .15s;position:relative;white-space:nowrap}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--green-dim);color:var(--green);font-weight:500}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--green);border-radius:0 3px 3px 0}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.nav-badge.green{background:var(--green);color:#0f1117}
+.sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.user-card:hover{background:var(--bg3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--green-dim);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green);flex-shrink:0}
+.user-name{font-size:13px;font-weight:500}
+.user-role{font-size:11px;color:var(--text3)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.page-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-primary{background:var(--green);color:#0f1117}
+.btn-primary:hover{background:var(--green2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.content{flex:1;overflow-y:auto;padding:28px}
+
+/* VIEWS */
+.view{display:none;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat:hover{border-color:var(--border2)}
+.stat-icon{font-size:22px;margin-bottom:12px}
+.stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1}
+.stat-label{font-size:12px;color:var(--text3);margin-top:4px;font-weight:400}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:8px;display:flex;align-items:center;gap:4px}
+.stat-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.15;filter:blur(20px)}
+
+/* PROGRESS BAR */
+.prog-wrap{background:var(--bg4);border-radius:20px;height:6px;overflow:hidden;margin-top:4px}
+.prog{height:100%;border-radius:20px;transition:width .8s ease}
+
+/* KANBAN */
+.kanban-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;min-height:300px}
+.col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.col-title{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text2)}
+.col-count{font-size:11px;background:var(--bg4);color:var(--text2);padding:2px 8px;border-radius:20px}
+.task{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative}
+.task:hover{border-color:var(--border2);transform:translateY(-1px)}
+.task-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:8px}
+.task-footer{display:flex;align-items:center;justify-content:space-between}
+.tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.02em}
+.tag-green{background:rgba(0,214,143,.15);color:#00d68f}
+.tag-amber{background:rgba(255,179,71,.15);color:#ffb347}
+.tag-red{background:rgba(255,107,107,.15);color:#ff6b6b}
+.tag-blue{background:rgba(91,141,238,.15);color:#5b8dee}
+.tag-purple{background:rgba(180,123,255,.15);color:#b47bff}
+.tag-teal{background:rgba(0,200,200,.15);color:#00c8c8}
+.av-xs{width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg)}
+.av-green{background:rgba(0,214,143,.2);color:var(--green)}
+.av-amber{background:rgba(255,179,71,.2);color:var(--amber)}
+.av-blue{background:rgba(91,141,238,.2);color:var(--blue)}
+.av-purple{background:rgba(180,123,255,.2);color:var(--purple)}
+.av-red{background:rgba(255,107,107,.2);color:var(--red)}
+.add-task-btn{width:100%;padding:8px;border-radius:8px;background:transparent;border:1px dashed var(--border2);color:var(--text3);font-size:12px;cursor:pointer;margin-top:8px;font-family:'DM Sans',sans-serif;transition:all .15s}
+.add-task-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border2)}
+
+/* TABLE */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg3)}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.sp-green{background:var(--green-dim);color:var(--green)}
+.sp-amber{background:var(--amber-dim);color:var(--amber)}
+.sp-red{background:var(--red-dim);color:var(--red)}
+.sp-gray{background:rgba(148,153,183,.1);color:var(--text2)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.member{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:border-color .2s}
+.member:hover{border-color:var(--border2)}
+.av-lg{width:56px;height:56px;border-radius:50%;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:2px solid}
+.member-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:2px}
+.member-role{font-size:12px;color:var(--text3);margin-bottom:14px}
+.member-stats{display:flex;gap:16px;width:100%}
+.mstat{flex:1;background:var(--bg3);border-radius:8px;padding:10px;text-align:center}
+.mstat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.mstat-label{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* BUDGET */
+.budget-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.budget-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.bs-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.bs-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800}
+.bs-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.diff-pos{color:var(--red)}
+.diff-neg{color:var(--green)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;width:440px;max-width:95vw;animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s}
+.field input:focus,.field select,.field textarea:focus{border-color:var(--green)}
+.field select{cursor:pointer}
+.field select option{background:var(--bg3)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* TIMELINE */
+.timeline-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tl-header{display:grid;grid-template-columns:200px 80px 90px 80px 1fr 110px;gap:8px;padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.tl-col-head{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.tl-row{display:grid;grid-template-columns:200px 80px 90px 80px 1fr 110px;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s}
+.tl-row:last-child{border-bottom:none}
+.tl-row:hover{background:var(--bg3)}
+.tl-task{font-size:13px;font-weight:500;color:var(--text)}
+.tl-owner{font-size:12px;color:var(--text2)}
+.tl-due{font-size:12px;color:var(--text2)}
+.tl-pct{font-size:11px;color:var(--text3);text-align:right}
+
+/* SECTION HEADER */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.section-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* OPENING COUNTDOWN */
+.countdown-banner{background:linear-gradient(135deg,rgba(0,214,143,.08),rgba(0,184,122,.04));border:1px solid rgba(0,214,143,.2);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between}
+.cd-label{font-size:12px;color:var(--green);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.cd-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.cd-days{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--green);line-height:1}
+.cd-days-label{font-size:12px;color:var(--text2)}
+
+/* OVERVIEW GRID */
+.overview-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;margin-top:24px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.recent-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.recent-item:last-child{border-bottom:none}
+.ri-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ri-info{flex:1}
+.ri-title{font-size:13px;font-weight:500}
+.ri-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.ri-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
+
+/* RISK */
+.risk-list{display:flex;flex-direction:column;gap:12px}
+.risk-item{background:var(--bg3);border-radius:8px;padding:14px 16px;border-left:3px solid}
+.risk-high{border-left-color:var(--red)}
+.risk-mid{border-left-color:var(--amber)}
+.risk-low{border-left-color:var(--green)}
+.risk-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.risk-desc{font-size:12px;color:var(--text2)}
+.risk-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:8px}
+.rb-high{background:var(--red-dim);color:var(--red)}
+.rb-mid{background:var(--amber-dim);color:var(--amber)}
+.rb-low{background:var(--green-dim);color:var(--green)}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--green);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:2000;animation:slideIn .3s ease;display:none}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo">
+      <div class="logo-icon">🛒</div>
+      <div>
+        <div class="logo-text">MarketPro</div>
+        <div class="logo-sub">Proje Yönetimi</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Ana Menü</div>
+    <div class="nav-item active" onclick="showView('dashboard',this)">
+      <span class="nav-icon">📊</span> Genel Bakış
+    </div>
+    <div class="nav-item" onclick="showView('kanban',this)">
+      <span class="nav-icon">🗂️</span> Kanban Panosu
+      <span class="nav-badge">12</span>
+    </div>
+    <div class="nav-item" onclick="showView('timeline',this)">
+      <span class="nav-icon">📅</span> Zaman Çizelgesi
+    </div>
+    <div class="nav-label">Yönetim</div>
+    <div class="nav-item" onclick="showView('team',this)">
+      <span class="nav-icon">👥</span> Ekip
+    </div>
+    <div class="nav-item" onclick="showView('budget',this)">
+      <span class="nav-icon">💰</span> Bütçe
+      <span class="nav-badge green">₺</span>
+    </div>
+    <div class="nav-item" onclick="showView('risks',this)">
+      <span class="nav-icon">⚠️</span> Riskler
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">AK</div>
+      <div>
+        <div class="user-name">Ahmet Kaya</div>
+        <div class="user-role">Proje Müdürü</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Genel Bakış</div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="openModal()">+ Görev Ekle</button>
+      <button class="btn btn-primary">📤 Dışa Aktar</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="countdown-banner">
+        <div>
+          <div class="cd-label">🏪 Açılışa Geri Sayım</div>
+          <div class="cd-text">Hedef Açılış: 1 Temmuz 2025, Pazar</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cd-days" id="countdown-days">47</div>
+          <div class="cd-days-label">gün kaldı</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-glow" style="background:var(--blue)"></div>
+          <div class="stat-icon">📋</div>
+          <div class="stat-val" style="color:var(--blue)">16</div>
+          <div class="stat-label">Toplam Görev</div>
+          <div class="stat-sub">🔵 Aktif projede</div>
+        </div>
+        <div class="stat">
+          <div class="stat-glow" style="background:var(--green)"></div>
+          <div class="stat-icon">✅</div>
+          <div class="stat-val" style="color:var(--green)" id="dash-done">4</div>
+          <div class="stat-label">Tamamlanan</div>
+          <div class="stat-sub">🟢 %25 ilerleme</div>
+        </div>
+        <div class="stat">
+          <div class="stat-glow" style="background:var(--amber)"></div>
+          <div class="stat-icon">⏳</div>
+          <div class="stat-val" style="color:var(--amber)">7</div>
+          <div class="stat-label">Devam Ediyor</div>
+          <div class="stat-sub">🟡 Aktif çalışma</div>
+        </div>
+        <div class="stat">
+          <div class="stat-glow" style="background:var(--red)"></div>
+          <div class="stat-icon">🚨</div>
+          <div class="stat-val" style="color:var(--red)">2</div>
+          <div class="stat-label">Geciken Görev</div>
+          <div class="stat-sub">🔴 Acil takip</div>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+        <div>
+          <div class="card-title">📈 Faz İlerlemesi</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text2)">🏛️ Ruhsat & İzinler</span>
+                <span style="font-size:12px;font-weight:600;color:var(--amber)">55%</span>
+              </div>
+              <div class="prog-wrap"><div class="prog" style="width:55%;background:var(--amber)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text2)">🏗️ Dekorasyon & Teknik</span>
+                <span style="font-size:12px;font-weight:600;color:var(--blue)">48%</span>
+              </div>
+              <div class="prog-wrap"><div class="prog" style="width:48%;background:var(--blue)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text2)">📦 Stok & Tedarik</span>
+                <span style="font-size:12px;font-weight:600;color:var(--purple)">35%</span>
+              </div>
+              <div class="prog-wrap"><div class="prog" style="width:35%;background:var(--purple)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text2)">📣 Pazarlama</span>
+                <span style="font-size:12px;font-weight:600;color:var(--green)">70%</span>
+              </div>
+              <div class="prog-wrap"><div class="prog" style="width:70%;background:var(--green)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text2)">👤 Personel</span>
+                <span style="font-size:12px;font-weight:600;color:var(--red)">10%</span>
+              </div>
+              <div class="prog-wrap"><div class="prog" style="width:10%;background:var(--red)"></div></div>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <div class="card-title">💰 Bütçe Özeti</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:13px;color:var(--text2)">Harcanan / Planlanan</span>
+              <span style="font-size:13px;font-weight:600;color:var(--green)">₺100.700 / ₺155.500</span>
+            </div>
+            <div class="prog-wrap" style="height:10px">
+              <div class="prog" style="width:65%;background:linear-gradient(90deg,var(--green),var(--blue))"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:6px">Toplam bütçenin %65'i kullanıldı</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔔 Son Aktiviteler</div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--green)"></div>
+            <div class="ri-info">
+              <div class="ri-title">Sosyal medya hesapları tamamlandı</div>
+              <div class="ri-meta">Selin Ö. · 2 saat önce</div>
+            </div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--amber)"></div>
+            <div class="ri-info">
+              <div class="ri-title">Tedarikçi sözleşmesi güncellendi</div>
+              <div class="ri-meta">Murat Y. · 5 saat önce</div>
+            </div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--blue)"></div>
+            <div class="ri-info">
+              <div class="ri-title">Açılış kampanyası %90 tamamlandı</div>
+              <div class="ri-meta">Selin Ö. · Dün</div>
+            </div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--green)"></div>
+            <div class="ri-info">
+              <div class="ri-title">Soğutma ünitesi kurulumu devam ediyor</div>
+              <div class="ri-meta">Emre Ç. · Dün</div>
+            </div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--red)"></div>
+            <div class="ri-info">
+              <div class="ri-title">Kasa sistemi kurulumu gecikti</div>
+              <div class="ri-meta">Emre Ç. · 2 gün önce</div>
+            </div>
+          </div>
+          <div class="recent-item">
+            <div class="ri-dot" style="background:var(--purple)"></div>
+            <div class="ri-info">
+              <div class="ri-title">İlk stok listesi incelemede</div>
+              <div class="ri-meta">Murat Y. · 3 gün önce</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KANBAN -->
+    <div class="view" id="view-kanban">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Kanban Panosu</div>
+          <div class="section-sub">Görevleri sürükleyerek veya tıklayarak yönetin</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Yeni Görev</button>
+      </div>
+      <div class="kanban-wrap" id="kanban-board"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="view" id="view-timeline">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Zaman Çizelgesi</div>
+          <div class="section-sub">Tüm görevlerin takvim ve ilerleme durumu</div>
+        </div>
+      </div>
+      <div class="timeline-wrap">
+        <div class="tl-header">
+          <div class="tl-col-head">Görev</div>
+          <div class="tl-col-head">Kategori</div>
+          <div class="tl-col-head">Sorumlu</div>
+          <div class="tl-col-head">Bitiş</div>
+          <div class="tl-col-head">İlerleme</div>
+          <div class="tl-col-head">Durum</div>
+        </div>
+        <div id="timeline-body"></div>
+      </div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="view" id="view-team">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Ekip Yönetimi</div>
+          <div class="section-sub">Proje ekibi ve görev dağılımı</div>
+        </div>
+      </div>
+      <div class="team-grid" id="team-grid"></div>
+    </div>
+
+    <!-- BUDGET -->
+    <div class="view" id="view-budget">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Bütçe Takibi</div>
+          <div class="section-sub">Planlanan ve gerçekleşen harcamalar</div>
+        </div>
+      </div>
+      <div class="budget-summary" id="budget-summary"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kalem</th><th>Kategori</th><th>Planlanan</th><th>Gerçekleşen</th><th>Fark</th><th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="budget-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RISKS -->
+    <div class="view" id="view-risks">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Risk Yönetimi</div>
+          <div class="section-sub">Proje riskleri ve azaltma stratejileri</div>
+        </div>
+      </div>
+      <div class="risk-list" id="risk-list"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">➕ Yeni Görev Ekle</div>
+    <div class="field">
+      <label>Görev Adı</label>
+      <input type="text" id="m-title" placeholder="Görev adını girin...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="field">
+        <label>Kategori</label>
+        <select id="m-tag">
+          <option>Ruhsat</option><option>Dekor</option><option>Stok</option>
+          <option>Personel</option><option>Pazarlama</option><option>Teknik</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sorumlu</label>
+        <select id="m-owner">
+          <option value="AK">Ahmet K.</option><option value="FK">Fatma K.</option>
+          <option value="MY">Murat Y.</option><option value="SÖ">Selin Ö.</option>
+          <option value="EÇ">Emre Ç.</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="field">
+        <label>Sütun</label>
+        <select id="m-col">
+          <option value="todo">Yapılacak</option><option value="inprogress">Devam Ediyor</option>
+          <option value="review">İncelemede</option><option value="done">Tamamlandı</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Bitiş Tarihi</label>
+        <input type="text" id="m-due" placeholder="örn: 25 Haz">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">İptal</button>
+      <button class="btn btn-primary" onclick="addTask()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif">✅ Görev başarıyla eklendi!</div>
+
+<script>
+const tagCls={Ruhsat:'tag-blue',Dekor:'tag-purple',Stok:'tag-green',Personel:'tag-teal',Pazarlama:'tag-amber',Teknik:'tag-red',Finans:'tag-blue'};
+const avCls={AK:'av-green',FK:'av-amber',MY:'av-blue','SÖ':'av-purple','EÇ':'av-red'};
+const avBorder={AK:'var(--green)',FK:'var(--amber)',MY:'var(--blue)','SÖ':'var(--purple)','EÇ':'var(--red)'};
+
+let tasks=[
+  {id:1,title:'Belediye işyeri açma ruhsatı',tag:'Ruhsat',owner:'FK',col:'inprogress',due:'15 Haz',progress:60},
+  {id:2,title:'Vergi dairesi kaydı',tag:'Ruhsat',owner:'FK',col:'done',due:'1 May',progress:100},
+  {id:3,title:'Esnaf Odası üyeliği',tag:'Ruhsat',owner:'AK',col:'done',due:'3 May',progress:100},
+  {id:4,title:'Raf ve dolap montajı',tag:'Dekor',owner:'EÇ',col:'inprogress',due:'20 Haz',progress:40},
+  {id:5,title:'Dış cephe ve tabela tasarımı',tag:'Dekor',owner:'SÖ',col:'todo',due:'25 Haz',progress:0},
+  {id:6,title:'Soğutma ünitesi kurulumu',tag:'Teknik',owner:'EÇ',col:'inprogress',due:'18 Haz',progress:75},
+  {id:7,title:'İlk stok listesi hazırlama',tag:'Stok',owner:'MY',col:'review',due:'10 Haz',progress:85},
+  {id:8,title:'Tedarikçi sözleşmeleri',tag:'Stok',owner:'MY',col:'inprogress',due:'12 Haz',progress:50},
+  {id:9,title:'Kasiyer personel alımı',tag:'Personel',owner:'AK',col:'todo',due:'22 Haz',progress:0},
+  {id:10,title:'Market yazılımı kurulumu',tag:'Teknik',owner:'EÇ',col:'done',due:'5 May',progress:100},
+  {id:11,title:'Güvenlik kamerası montajı',tag:'Teknik',owner:'EÇ',col:'todo',due:'28 Haz',progress:0},
+  {id:12,title:'Açılış kampanyası planı',tag:'Pazarlama',owner:'SÖ',col:'review',due:'8 Haz',progress:90},
+  {id:13,title:'Sosyal medya hesapları',tag:'Pazarlama',owner:'SÖ',col:'done',due:'1 Haz',progress:100},
+  {id:14,title:'Hijyen ve gıda belgesi',tag:'Ruhsat',owner:'FK',col:'todo',due:'20 Haz',progress:0},
+  {id:15,title:'Kasa sistemi ve barkod',tag:'Teknik',owner:'EÇ',col:'inprogress',due:'14 Haz',progress:30},
+  {id:16,title:'Açılış daveti gönderimi',tag:'Pazarlama',owner:'SÖ',col:'todo',due:'28 Haz',progress:0},
+];
+
+const cols=[
+  {id:'todo',label:'Yapılacak',color:'var(--text3)'},
+  {id:'inprogress',label:'Devam Ediyor',color:'var(--amber)'},
+  {id:'review',label:'İncelemede',color:'var(--blue)'},
+  {id:'done',label:'Tamamlandı',color:'var(--green)'},
+];
+
+const members=[
+  {init:'AK',name:'Ahmet Kaya',role:'Proje Müdürü',col:'av-green',border:'var(--green)'},
+  {init:'FK',name:'Fatma Kılıç',role:'Ruhsat Sorumlusu',col:'av-amber',border:'var(--amber)'},
+  {init:'MY',name:'Murat Yıldız',role:'Tedarik Uzmanı',col:'av-blue',border:'var(--blue)'},
+  {init:'SÖ',name:'Selin Öztürk',role:'Pazarlama',col:'av-purple',border:'var(--purple)'},
+  {init:'EÇ',name:'Emre Çelik',role:'Teknik Sorumlu',col:'av-red',border:'var(--red)'},
+];
+
+const budget=[
+  {item:'Kira depozitosu',cat:'Kira',planned:15000,actual:15000},
+  {item:'Ruhsat ve harçlar',cat:'Ruhsat',planned:3500,actual:2800},
+  {item:'İç dekorasyon',cat:'Dekor',planned:25000,actual:18000},
+  {item:'Raf sistemleri',cat:'Dekor',planned:12000,actual:13500},
+  {item:'Soğutucu ünite',cat:'Teknik',planned:18000,actual:18000},
+  {item:'Kasa ve yazılım',cat:'Teknik',planned:8000,actual:7200},
+  {item:'Güvenlik sistemi',cat:'Teknik',planned:5000,actual:0},
+  {item:'İlk stok alımı',cat:'Stok',planned:40000,actual:15000},
+  {item:'Tabela',cat:'Dekor',planned:4000,actual:0},
+  {item:'Personel maaşı (1 ay)',cat:'Personel',planned:20000,actual:10000},
+  {item:'Pazarlama',cat:'Pazarlama',planned:5000,actual:1200},
+];
+
+const risks=[
+  {title:'Ruhsat sürecinin gecikmesi',desc:'Belediye onayının 2 haftadan fazla gecikmesi halinde açılış tarihi ertelenebilir.',level:'high',action:'Tüm belgeler önceden hazırlandı, ön görüşme yapıldı. Danışman tutuldu.'},
+  {title:'İlk dönem nakit akışı sorunu',desc:'Break-even noktasına 4. aydan önce ulaşılamaması durumunda likidite sıkışıklığı oluşabilir.',level:'high',action:'3 aylık rezerv fon ayrıldı. KOSGEB başvurusu planlandı.'},
+  {title:'Tedarikçi sözleşmesi gecikmesi',desc:'Ana tedarikçilerle anlaşma sağlanamaması stok açılışını etkileyebilir.',level:'mid',action:'Her kategori için 2 yedek tedarikçi belirlendi.'},
+  {title:'Personel bulma güçlüğü',desc:'Nitelikli kasiyer ve raf görevlisi bulmak zaman alabilir.',level:'mid',action:'İlan 3 hafta önce verilecek, sosyal medya ve ağ üzerinden duyuru yapılacak.'},
+  {title:'Rakip fiyat saldırısı',desc:'Zincir market tarafından agresif indirim kampanyası başlatılabilir.',level:'low',action:'Farklılaşma stratejisi: yerel ürün, hız ve kişisel hizmet ön plana çıkarılacak.'},
+  {title:'Teknik ekipman arızası',desc:'Soğutma ünitesi veya kasa sistemi arızası operasyonu durdurabilir.',level:'low',action:'Teknik ekipmanlar için 1 yıllık bakım sözleşmesi imzalanacak.'},
+];
+
+// RENDER KANBAN
+function renderKanban(){
+  const board=document.getElementById('kanban-board');
+  board.innerHTML='';
+  cols.forEach(c=>{
+    const ct=tasks.filter(t=>t.col===c.id);
+    const div=document.createElement('div');
+    div.className='col';
+    div.innerHTML=`<div class="col-head">
+      <span class="col-title" style="color:${c.color}">${c.label}</span>
+      <span class="col-count">${ct.length}</span>
+    </div>`;
+    ct.forEach(t=>{
+      const tc=tagCls[t.tag]||'tag-green';
+      const ac=avCls[t.owner]||'av-green';
+      div.innerHTML+=`<div class="task">
+        <div class="task-title">${t.title}</div>
+        <div class="task-footer">
+          <span class="tag ${tc}">${t.tag}</span>
+          <div class="av-xs ${ac}">${t.owner}</div>
+        </div>
+      </div>`;
+    });
+    div.innerHTML+=`<button class="add-task-btn" onclick="openModal()">+ Görev ekle</button>`;
+    board.appendChild(div);
+  });
+}
+
+// RENDER TIMELINE
+function renderTimeline(){
+  const body=document.getElementById('timeline-body');
+  body.innerHTML='';
+  tasks.forEach(t=>{
+    const tc=tagCls[t.tag]||'tag-green';
+    const statCls=t.progress===100?'sp-green':t.progress>0?'sp-amber':'sp-gray';
+    const statTxt=t.progress===100?'Tamamlandı':t.progress>0?'Devam Ediyor':'Bekliyor';
+    const barColor=t.progress===100?'var(--green)':t.progress>60?'var(--amber)':'var(--blue)';
+    body.innerHTML+=`<div class="tl-row">
+      <div class="tl-task">${t.title}</div>
+      <div><span class="tag ${tc}">${t.tag}</span></div>
+      <div class="tl-owner">${t.owner}</div>
+      <div class="tl-due">${t.due}</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="prog-wrap" style="flex:1"><div class="prog" style="width:${t.progress}%;background:${barColor}"></div></div>
+          <span class="tl-pct">${t.progress}%</span>
+        </div>
+      </div>
+      <div><span class="status-pill ${statCls}"><span class="dot"></span>${statTxt}</span></div>
+    </div>`;
+  });
+}
+
+// RENDER TEAM
+function renderTeam(){
+  const grid=document.getElementById('team-grid');
+  grid.innerHTML='';
+  members.forEach(m=>{
+    const total=tasks.filter(t=>t.owner===m.init).length;
+    const done=tasks.filter(t=>t.owner===m.init&&t.col==='done').length;
+    const inprog=tasks.filter(t=>t.owner===m.init&&t.col==='inprogress').length;
+    grid.innerHTML+=`<div class="member">
+      <div class="av-lg ${m.col}" style="border-color:${m.border}">${m.init}</div>
+      <div class="member-name">${m.name}</div>
+      <div class="member-role">${m.role}</div>
+      <div class="member-stats">
+        <div class="mstat"><div class="mstat-val" style="color:var(--blue)">${total}</div><div class="mstat-label">Toplam</div></div>
+        <div class="mstat"><div class="mstat-val" style="color:var(--green)">${done}</div><div class="mstat-label">Bitti</div></div>
+        <div class="mstat"><div class="mstat-val" style="color:var(--amber)">${inprog}</div><div class="mstat-label">Devam</div></div>
+      </div>
+    </div>`;
+  });
+}
+
+// RENDER BUDGET
+function renderBudget(){
+  let tp=0,ta=0;
+  budget.forEach(b=>{tp+=b.planned;ta+=b.actual});
+  const rem=tp-ta;
+  document.getElementById('budget-summary').innerHTML=`
+    <div class="budget-stat"><div class="bs-label">Toplam Bütçe</div><div class="bs-val">₺${tp.toLocaleString('tr-TR')}</div><div class="bs-sub">Başlangıç sermayesi</div></div>
+    <div class="budget-stat"><div class="bs-label">Harcanan</div><div class="bs-val" style="color:var(--amber)">₺${ta.toLocaleString('tr-TR')}</div><div class="bs-sub">%${Math.round(ta/tp*100)} kullanıldı</div></div>
+    <div class="budget-stat"><div class="bs-label">Kalan</div><div class="bs-val" style="color:var(--green)">₺${rem.toLocaleString('tr-TR')}</div><div class="bs-sub">Kullanılabilir bütçe</div></div>
+  `;
+  const tbody=document.getElementById('budget-tbody');
+  tbody.innerHTML='';
+  budget.forEach(b=>{
+    const diff=b.actual-b.planned;
+    const diffStr=diff===0?'—':diff>0?`+₺${Math.abs(diff).toLocaleString('tr-TR')}`:`-₺${Math.abs(diff).toLocaleString('tr-TR')}`;
+    const diffColor=diff>0?'color:var(--red)':diff<0?'color:var(--green)':'color:var(--text3)';
+    const tc=tagCls[b.cat]||'tag-blue';
+    const statCls=b.actual===0?'sp-gray':b.actual>b.planned?'sp-red':'sp-green';
+    const statTxt=b.actual===0?'Bekliyor':b.actual>b.planned?'Aşıldı':'Normal';
+    tbody.innerHTML+=`<tr>
+      <td style="font-weight:500">${b.item}</td>
+      <td><span class="tag ${tc}">${b.cat}</span></td>
+      <td>₺${b.planned.toLocaleString('tr-TR')}</td>
+      <td>${b.actual>0?'₺'+b.actual.toLocaleString('tr-TR'):'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="${diffColor};font-weight:600">${diffStr}</td>
+      <td><span class="status-pill ${statCls}"><span class="dot"></span>${statTxt}</span></td>
+    </tr>`;
+  });
+}
+
+// RENDER RISKS
+function renderRisks(){
+  const list=document.getElementById('risk-list');
+  list.innerHTML='';
+  risks.forEach(r=>{
+    const cls=r.level==='high'?'risk-high':r.level==='mid'?'risk-mid':'risk-low';
+    const bcls=r.level==='high'?'rb-high':r.level==='mid'?'rb-mid':'rb-low';
+    const label=r.level==='high'?'🔴 Yüksek Risk':r.level==='mid'?'🟡 Orta Risk':'🟢 Düşük Risk';
+    list.innerHTML+=`<div class="risk-item ${cls}">
+      <div class="risk-title">${r.title}</div>
+      <div class="risk-desc">${r.desc}</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text2)">💡 <strong>Önlem:</strong> ${r.action}</div>
+      <span class="risk-badge ${bcls}">${label}</span>
+    </div>`;
+  });
+}
+
+// NAV
+function showView(id, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  el.classList.add('active');
+  const titles={dashboard:'Genel Bakış',kanban:'Kanban Panosu',timeline:'Zaman Çizelgesi',team:'Ekip Yönetimi',budget:'Bütçe Takibi',risks:'Risk Yönetimi'};
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(id==='kanban') renderKanban();
+  if(id==='timeline') renderTimeline();
+  if(id==='team') renderTeam();
+  if(id==='budget') renderBudget();
+  if(id==='risks') renderRisks();
+}
+
+// MODAL
+function openModal(){document.getElementById('modal-overlay').classList.add('open')}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+function addTask(){
+  const title=document.getElementById('m-title').value.trim();
+  if(!title) return;
+  const tag=document.getElementById('m-tag').value;
+  const owner=document.getElementById('m-owner').value;
+  const col=document.getElementById('m-col').value;
+  const due=document.getElementById('m-due').value||'—';
+  tasks.push({id:Date.now(),title,tag,owner,col,due,progress:0});
+  closeModal();
+  document.getElementById('m-title').value='';
+  document.getElementById('m-due').value='';
+  renderKanban();
+  const notif=document.getElementById('notif');
+  notif.style.display='block';
+  setTimeout(()=>notif.style.display='none',2500);
+}
+
+// COUNTDOWN
+function updateCountdown(){
+  const target=new Date('2025-07-01');
+  const now=new Date();
+  const diff=Math.ceil((target-now)/(1000*60*60*24));
+  const el=document.getElementById('countdown-days');
+  if(el) el.textContent=diff>0?diff:'Açıldı!';
+}
+updateCountdown();
+
+// INIT
+renderKanban();
+</script>
+</body>
+</html>
